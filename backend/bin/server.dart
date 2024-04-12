@@ -1,17 +1,28 @@
+import 'dart:convert' as convert;
+import 'dart:convert';
 import 'dart:io';
+
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
-import 'package:shelf_router/shelf_router.dart';
 
 import '../config/routes.dart';
+import 'jwt.dart';
 
 Response rootHandler(Request req) {
   return Response.ok('Hello, World!\n');
 }
 
-Response echoHandler(Request request) {
-  final message = request.params['message'];
-  return Response.ok('$message\n');
+// 新規登録
+Future<Response> registerUserHandler(Request request) async {
+  final headers = request.headers;
+  final query = await request.readAsString();
+  final payload = jsonDecode(query) as Map<String, dynamic>;
+  final jwtToken = generateJWT(headers, payload, key);
+  return Response.ok(convert.json.encode({'token': jwtToken}));
+}
+
+Response loginHandler(Request request) {
+  return Response.ok('Hello, World!\n');
 }
 
 void main(List<String> args) async {
