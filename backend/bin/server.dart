@@ -14,12 +14,11 @@ const key = 'secret_key';
 final dummyDB = <String, Map<String, String>>{}; // email: password, user_id
 
 Future<Response> getUserHandler(Request request) async {
-  final headers = request.headers;
   final query = await request.readAsString();
   final payload = jsonDecode(query) as Map<String, dynamic>;
   final jwt = payload['token'] as String;
   if (!checkJWT(key, jwt)) {
-    Response.forbidden(
+    return Response.forbidden(
       convert.json.encode({'message': 'token is expired.'}),
     );
   }
@@ -54,13 +53,13 @@ Future<Response> loginHandler(Request request) async {
     );
   }
 
-
   if (dummyDB[payload['email']]!['password'] != payload['password']) {
     return Response.unauthorized(
       convert.json.encode({'message': 'password is wrong.'}),
     );
   }
 
+  // 有効期限は1分間
   final jwtPayload = {
     'email': payload['email'],
     'iat': (DateTime.now().millisecondsSinceEpoch / 1000).round(),

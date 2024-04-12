@@ -75,7 +75,7 @@ bool checkJWT(String key, String jwt) {
         DateTime.fromMillisecondsSinceEpoch((payload['exp'] as int) * 1000),
       )
       .inMicroseconds;
-  if (diff < 0) return false;
+  if (diff > 0) return false;
 
   return true;
 }
