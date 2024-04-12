@@ -14,6 +14,19 @@ Response rootHandler(Request req) {
 
 // 新規登録
 Future<Response> registerUserHandler(Request request) async {
+  final query = await request.readAsString();
+  final payload = jsonDecode(query) as Map<String, dynamic>;
+  final newUser = User.fromJson(payload);
+  final newUserId = generateRandomString();
+  dummyDB[newUserId] = newUser;
+  return Response.ok(
+    convert.json.encode(
+      {'id': newUserId, 'email': newUser.email},
+    ),
+  );
+}
+
+Future<Response> loginHandler(Request request) async {
   final headers = request.headers;
   final query = await request.readAsString();
   final payload = jsonDecode(query) as Map<String, dynamic>;
