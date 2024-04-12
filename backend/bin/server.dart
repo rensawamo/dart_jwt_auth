@@ -6,22 +6,33 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 
 import '../config/routes.dart';
+import '../util/generate_random_string.dart';
 import 'jwt.dart';
 
-Response rootHandler(Request req) {
-  return Response.ok('Hello, World!\n');
+const key = 'secret_key';
+
+final dummyDB = <String, Map<String, String>>{}; // email: password, user_id
+
+Future<Response> getUserHandler(Request request) async {
+  final headers = request.headers;
+  final query = await request.readAsString();
+  final payload = jsonDecode(query) as Map<String, dynamic>;
+  final jwtToken = generateJWT(headers, payload, key);
+  return Response.ok(convert.json.encode({'email': jwtToken}));
 }
 
 // 新規登録
 Future<Response> registerUserHandler(Request request) async {
   final query = await request.readAsString();
   final payload = jsonDecode(query) as Map<String, dynamic>;
-  final newUser = User.fromJson(payload);
   final newUserId = generateRandomString();
-  dummyDB[newUserId] = newUser;
+  dummyDB[payload['email'] as String] = {
+    'password': payload['password'] as String,
+    'user_id': newUserId,
+  };
   return Response.ok(
     convert.json.encode(
-      {'id': newUserId, 'email': newUser.email},
+      {'id': newUserId, 'email': payload['email']},
     ),
   );
 }
@@ -30,12 +41,25 @@ Future<Response> loginHandler(Request request) async {
   final headers = request.headers;
   final query = await request.readAsString();
   final payload = jsonDecode(query) as Map<String, dynamic>;
-  final jwtToken = generateJWT(headers, payload, key);
-  return Response.ok(convert.json.encode({'token': jwtToken}));
-}
 
-Response loginHandler(Request request) {
-  return Response.ok('Hello, World!\n');
+  if (!dummyDB.containsKey(payload['email'])) {
+    return Response.unauthorized(
+        convert.json.encode({'message': 'email is not found.'}));
+  }
+
+  if (dummyDB[payload['email']]!['password'] != payload['password']) {
+    Response.unauthorized(
+        convert.json.encode({'message': 'password is wrong.'}));
+  }
+
+  final jwtPayload = {
+    'email': payload['email'],
+    'iat': DateTime.now().millisecondsSinceEpoch / 1000,
+    'exp': (DateTime.now().millisecondsSinceEpoch) / 1000 + 60,
+  };
+
+  final jwtToken = generateJWT(headers, jwtPayload, key);
+  return Response.ok(convert.json.encode({'token': jwtToken}));
 }
 
 void main(List<String> args) async {
@@ -43,7 +67,8 @@ void main(List<String> args) async {
   final ip = InternetAddress.anyIPv4;
 
   // Configure a pipeline that logs requests.
-  final handler = Pipeline().addMiddleware(logRequests()).addHandler(router);
+  final handler =
+      const Pipeline().addMiddleware(logRequests()).addHandler(router);
 
   // For running in containers, we respect the PORT environment variable.
   final port = int.parse(Platform.environment['PORT'] ?? '8080');
