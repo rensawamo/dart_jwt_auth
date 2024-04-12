@@ -17,8 +17,14 @@ Future<Response> getUserHandler(Request request) async {
   final headers = request.headers;
   final query = await request.readAsString();
   final payload = jsonDecode(query) as Map<String, dynamic>;
-  final jwtToken = generateJWT(headers, payload, key);
-  return Response.ok(convert.json.encode({'email': jwtToken}));
+  final jwt = payload['token'] as String;
+  if (!checkJWT(key, jwt)) {
+    Response.forbidden(
+      convert.json.encode({'message': 'token is expired.'}),
+    );
+  }
+  final jwtPayload = getPayload(key, jwt);
+  return Response.ok(convert.json.encode({'email': jwtPayload['email']}));
 }
 
 // 新規登録
@@ -44,18 +50,21 @@ Future<Response> loginHandler(Request request) async {
 
   if (!dummyDB.containsKey(payload['email'])) {
     return Response.unauthorized(
-        convert.json.encode({'message': 'email is not found.'}));
+      convert.json.encode({'message': 'email is not found.'}),
+    );
   }
 
+
   if (dummyDB[payload['email']]!['password'] != payload['password']) {
-    Response.unauthorized(
-        convert.json.encode({'message': 'password is wrong.'}));
+    return Response.unauthorized(
+      convert.json.encode({'message': 'password is wrong.'}),
+    );
   }
 
   final jwtPayload = {
     'email': payload['email'],
-    'iat': DateTime.now().millisecondsSinceEpoch / 1000,
-    'exp': (DateTime.now().millisecondsSinceEpoch) / 1000 + 60,
+    'iat': (DateTime.now().millisecondsSinceEpoch / 1000).round(),
+    'exp': ((DateTime.now().millisecondsSinceEpoch) / 1000 + 60).round(),
   };
 
   final jwtToken = generateJWT(headers, jwtPayload, key);
