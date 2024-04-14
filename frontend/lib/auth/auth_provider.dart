@@ -40,7 +40,7 @@ class AuthNotifier extends Notifier<AsyncValue<User?>> {
     return User.fromJson(json);
   }
 
-  FutureOr<void> register(String email, String password) async {
+  FutureOr<bool> register(String email, String password) async {
     state = const AsyncValue.loading();
     final response = await http.post(
       Uri.parse('http://127.0.0.1:8080/register'),
@@ -57,13 +57,13 @@ class AuthNotifier extends Notifier<AsyncValue<User?>> {
         'Could not resist your data.',
         StackTrace.empty,
       );
-      return;
+      return false;
     }
 
-    await login(email, password);
+    return await login(email, password);
   }
 
-  FutureOr<void> login(String email, String password) async {
+  FutureOr<bool> login(String email, String password) async {
     state = const AsyncValue.loading();
     final response = await http.post(
       Uri.parse('http://127.0.0.1:8080/login'),
@@ -79,7 +79,7 @@ class AuthNotifier extends Notifier<AsyncValue<User?>> {
         'failed to log in',
         StackTrace.empty,
       );
-      return;
+      return false;
     }
     final json = jsonDecode(response.body) as Map<String, dynamic>;
     final token = json['token'] as String;
@@ -88,6 +88,7 @@ class AuthNotifier extends Notifier<AsyncValue<User?>> {
     await prefs.setString('token', token);
 
     state = AsyncValue.data(User(email: email));
+    return true;
   }
 
   FutureOr<void> logout() async {
