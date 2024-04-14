@@ -52,13 +52,6 @@ Map<String, dynamic> getPayload(String key, String jwt) {
   return convert.json.decode(payloadString) as Map<String, dynamic>;
 }
 
-bool isExpied(int timestamp) {
-  return DateTime.now()
-          .difference(DateTime.fromMillisecondsSinceEpoch(timestamp * 1000))
-          .inMilliseconds <
-      0;
-}
-
 bool checkJWT(String key, String jwt) {
   final splits = jwt.split('.');
   final unsignedToken = '${splits[0]}.${splits[1]}'; // headers, payload
