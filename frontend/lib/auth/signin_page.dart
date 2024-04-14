@@ -4,19 +4,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'auth_provider.dart';
 
 // メールアドレスのテキストを保存するProvider
-final emailProvider = StateProvider.autoDispose((ref) {
+final emailProvider = StateProvider.autoDispose<TextEditingController>((ref) {
   return TextEditingController(text: '');
 });
 
-final passwordProvider = StateProvider.autoDispose((ref) {
-  // パスワードのテキストを保存するProvider
+// パスワードのテキストを保存するProvider
+final passwordProvider =
+    StateProvider.autoDispose<TextEditingController>((ref) {
   return TextEditingController(text: '');
 });
 
 /// 認証のページ.
 /// 今回は新規登録とログインは同じページにしました.
 class LoginPage extends ConsumerWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,51 +33,100 @@ class LoginPage extends ConsumerWidget {
         title: const Text('ログイン'),
       ),
       body: authState.when(
-        data: (_) => Center(
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'メールアドレス'),
-                ),
-                TextField(
-                  controller: passwordController,
-                  decoration: const InputDecoration(labelText: 'パスワード'),
-                  obscureText: true,
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 60),
-                  width: 200,
-                  height: 60,
-                  child: ElevatedButton(
-                    child: const Text('ログイン'),
-                    onPressed: () async {
-                      final email = emailController.text;
-                      final password = passwordController.text;
-                      auth.login(email, password);
-                      // try {
-                      //   // メール/パスワードでログイン
-                      //   final User? user = (await FirebaseAuth.instance
-                      //           .signInWithEmailAndPassword(
-                      //               email: emailController.text,
-                      //               password: passwordlController.text))
-                      //       .user;
-                      //   if (user != null) context.go('/mypage');
-                      // } catch (e) {
-                      //   print(e);
-                      // }
-                    },
-                  ),
-                ),
-              ],
+        data: (_) =>
+            _buildDataBody(emailController, passwordController, auth, context),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) =>
+            _buildErrorBody(emailController, passwordController, auth, context),
+      ),
+    );
+  }
+
+  Widget _buildDataBody(
+    TextEditingController emailController,
+    TextEditingController passwordController,
+    AuthNotifier auth,
+    BuildContext context,
+  ) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'メールアドレス'),
             ),
-          ),
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: 'パスワード'),
+              obscureText: true,
+            ),
+            _buildElevatedButton('ログイン', () async {
+              final email = emailController.text;
+              final password = passwordController.text;
+              final isLogin = await auth.login(email, password);
+              if (isLogin) {
+                Navigator.pop(context);
+              }
+            }),
+          ],
         ),
-        loading: () => const CircularProgressIndicator(),
-        error: (e, _) => Container(),
+      ),
+    );
+  }
+
+  Widget _buildErrorBody(
+    TextEditingController emailController,
+    TextEditingController passwordController,
+    AuthNotifier auth,
+    BuildContext context,
+  ) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: 'メールアドレス'),
+            ),
+            TextField(
+              controller: passwordController,
+              decoration: const InputDecoration(labelText: 'パスワード'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'メールアドレスまたはパスワードが違います。',
+              style: TextStyle(
+                color: Colors.red,
+              ),
+            ),
+            _buildElevatedButton('ログイン', () async {
+              final email = emailController.text;
+              final password = passwordController.text;
+              final isLogin = await auth.login(email, password);
+              if (isLogin) {
+                Navigator.pop(context);
+              }
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildElevatedButton(String text, VoidCallback onPressed) {
+    return Container(
+      margin: const EdgeInsets.only(top: 30),
+      width: 200,
+      height: 60,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Text(text),
       ),
     );
   }
