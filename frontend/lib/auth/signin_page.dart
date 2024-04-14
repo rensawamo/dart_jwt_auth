@@ -32,46 +32,52 @@ class LoginPage extends ConsumerWidget {
         title: const Text('ログイン'),
       ),
       body: authState.when(
-          data: (_) => Center(
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      TextField(
-                        controller: emailController,
-                        decoration: const InputDecoration(labelText: 'メールアドレス'),
-                      ),
-                      TextField(
-                        controller: passwordController,
-                        decoration: const InputDecoration(labelText: 'パスワード'),
-                        obscureText: true,
-                      ),
-                      ElevatedButton(
-                        child: const Text('ログイン'),
-                        onPressed: () async {
-                          final email = emailController.text;
-                          final password = passwordController.text;
-                          auth.login(email, password);
-                          // try {
-                          //   // メール/パスワードでログイン
-                          //   final User? user = (await FirebaseAuth.instance
-                          //           .signInWithEmailAndPassword(
-                          //               email: emailController.text,
-                          //               password: passwordlController.text))
-                          //       .user;
-                          //   if (user != null) context.go('/mypage');
-                          // } catch (e) {
-                          //   print(e);
-                          // }
-                        },
-                      ),
-                    ],
+        data: (_) => Center(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: 'メールアドレス'),
+                ),
+                TextField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(labelText: 'パスワード'),
+                  obscureText: true,
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 60),
+                  width: 200,
+                  height: 60,
+                  child: ElevatedButton(
+                    child: const Text('ログイン'),
+                    onPressed: () async {
+                      final email = emailController.text;
+                      final password = passwordController.text;
+                      auth.login(email, password);
+                      // try {
+                      //   // メール/パスワードでログイン
+                      //   final User? user = (await FirebaseAuth.instance
+                      //           .signInWithEmailAndPassword(
+                      //               email: emailController.text,
+                      //               password: passwordlController.text))
+                      //       .user;
+                      //   if (user != null) context.go('/mypage');
+                      // } catch (e) {
+                      //   print(e);
+                      // }
+                    },
                   ),
                 ),
-              ),
-          loading: () => const CircularProgressIndicator(),
-          error: (e, _) => Container()),
+              ],
+            ),
+          ),
+        ),
+        loading: () => const CircularProgressIndicator(),
+        error: (e, _) => Container(),
+      ),
     );
   }
 }

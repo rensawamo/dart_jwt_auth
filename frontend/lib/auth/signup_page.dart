@@ -45,24 +45,29 @@ class SignUpPage extends ConsumerWidget {
                   decoration: const InputDecoration(labelText: 'パスワード'),
                   obscureText: true,
                 ),
-                ElevatedButton(
-                  child: const Text('ユーザ登録'),
-                  onPressed: () async {
-                    final email = emailController.text;
-                    final password = passwordlController.text;
-                    await auth.register(email, password);
-                    Navigator.pop(context);
-                    // try {
-                    //   final User? user = (await FirebaseAuth.instance
-                    //           .createUserWithEmailAndPassword(
-                    //               email: emailController.text,
-                    //               password: passwordlController.text))
-                    //       .user;
-                    //   if (user != null) {}
-                    // } catch (e) {
-                    //   print(e);
-                    // }
-                  },
+                Container(
+                  margin: const EdgeInsets.only(top: 60),
+                  width: 200,
+                  height: 60,
+                  child: ElevatedButton(
+                    child: const Text('ユーザ登録'),
+                    onPressed: () async {
+                      final email = emailController.text;
+                      final password = passwordlController.text;
+                      await auth.register(email, password);
+                      Navigator.pop(context);
+                      // try {
+                      //   final User? user = (await FirebaseAuth.instance
+                      //           .createUserWithEmailAndPassword(
+                      //               email: emailController.text,
+                      //               password: passwordlController.text))
+                      //       .user;
+                      //   if (user != null) {}
+                      // } catch (e) {
+                      //   print(e);
+                      // }
+                    },
+                  ),
                 ),
               ],
             ),
