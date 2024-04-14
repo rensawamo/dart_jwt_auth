@@ -9,43 +9,66 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final auth = ref.read(authProvider.notifier);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AsyncNotifier'),
+        title: const Text('JWT Authentication'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(authState.value != null ? authState.value!.email : "Yor aren't loged in."),
-            SizedBox(
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
               width: 200,
               height: 60,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/signup'),
+              child: Center(
                 child: Text(
-                  '登録',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline6!
-                      .copyWith(color: Colors.white),
+                  authState.value != null
+                      ? 'Current user is ${authState.value!.email}'
+                      : "Yor aren't loged in.",
                 ),
               ),
             ),
-            SizedBox(
-              width: 200,
-              height: 60,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/login'),
-                child: Text(
-                  'ログイン',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(color: Colors.white),
+            if (authState.value == null)
+              Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    width: 200,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pushNamed(context, '/signup'),
+                      child: const Text(
+                        '登録',
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    width: 200,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pushNamed(context, '/login'),
+                      child: const Text(
+                        'ログイン',
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                width: 200,
+                height: 60,
+                child: ElevatedButton(
+                  onPressed: () async => await auth.logout(),
+                  child: const Text(
+                    'ログアウト',
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
