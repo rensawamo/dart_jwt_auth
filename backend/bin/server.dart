@@ -23,7 +23,11 @@ Future<Response> getUserHandler(Request request) async {
     );
   }
   final jwtPayload = getPayload(key, jwt);
-  return Response.ok(convert.json.encode({'email': jwtPayload['email']}));
+  final userId = jwtPayload['user_id'] as String;
+  final email = dummyDB.keys.firstWhere(
+    (k) => dummyDB[k]!['user_id'] == userId,
+  );
+  return Response.ok(convert.json.encode({'user_id': userId, 'email': email}));
 }
 
 // 新規登録
@@ -61,7 +65,7 @@ Future<Response> loginHandler(Request request) async {
 
   // 有効期限は1分間
   final jwtPayload = {
-    'email': payload['email'],
+    'user_id': dummyDB[payload['email']]!['user_id'],
     'iat': (DateTime.now().millisecondsSinceEpoch / 1000).round(),
     'exp': ((DateTime.now().millisecondsSinceEpoch) / 1000 + 60).round(),
   };
