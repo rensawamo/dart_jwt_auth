@@ -22,7 +22,7 @@ Future<Response> getUserHandler(Request request) async {
       convert.json.encode({'message': 'token is expired.'}),
     );
   }
-  final jwtPayload = getPayload(key, jwt);
+  final jwtPayload = getPayload(key);
   final userId = jwtPayload['user_id'] as String;
   final email = dummyDB.keys.firstWhere(
     (k) => dummyDB[k]!['user_id'] == userId,
@@ -39,8 +39,8 @@ Future<Response> registerUserHandler(Request request) async {
     'password': payload['password'] as String,
     'user_id': newUserId,
   };
-  return Response.ok(
-    convert.json.encode(
+  return Response(201,
+    body: convert.json.encode(
       {'id': newUserId, 'email': payload['email']},
     ),
   );
@@ -51,6 +51,7 @@ Future<Response> loginHandler(Request request) async {
   final query = await request.readAsString();
   final payload = jsonDecode(query) as Map<String, dynamic>;
 
+  // DBに問い合わせる
   if (!dummyDB.containsKey(payload['email'])) {
     return Response.unauthorized(
       convert.json.encode({'message': 'email is not found.'}),
@@ -70,6 +71,7 @@ Future<Response> loginHandler(Request request) async {
     'exp': ((DateTime.now().millisecondsSinceEpoch) / 1000 + 60).round(),
   };
 
+  // JWTを生成し、ユーザにそれを返す。
   final jwtToken = generateJWT(headers, jwtPayload, key);
   return Response.ok(convert.json.encode({'token': jwtToken}));
 }
