@@ -44,15 +44,10 @@ class AuthNotifier extends Notifier<AsyncValue<User?>> {
     state = const AsyncValue.loading();
     final response = await http.post(
       Uri.parse('http://127.0.0.1:8080/register'),
-      headers: {
-        'alg': 'HS256',
-        'typ': 'JWT',
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
       body: jsonEncode({'email': email, 'password': password}),
     );
 
-    if (response.statusCode != 200) {
+    if (response.statusCode != 201) {
       state = const AsyncValue.error(
         'Could not resist your data.',
         StackTrace.empty,

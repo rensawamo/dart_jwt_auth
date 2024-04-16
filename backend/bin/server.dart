@@ -22,7 +22,7 @@ Future<Response> getUserHandler(Request request) async {
       convert.json.encode({'message': 'token is expired.'}),
     );
   }
-  final jwtPayload = getPayload(key);
+  final jwtPayload = getPayload(jwt);
   final userId = jwtPayload['user_id'] as String;
   final email = dummyDB.keys.firstWhere(
     (k) => dummyDB[k]!['user_id'] == userId,
@@ -39,7 +39,8 @@ Future<Response> registerUserHandler(Request request) async {
     'password': payload['password'] as String,
     'user_id': newUserId,
   };
-  return Response(201,
+  return Response(
+    201,
     body: convert.json.encode(
       {'id': newUserId, 'email': payload['email']},
     ),
@@ -50,7 +51,6 @@ Future<Response> loginHandler(Request request) async {
   final headers = request.headers;
   final query = await request.readAsString();
   final payload = jsonDecode(query) as Map<String, dynamic>;
-
   // DBに問い合わせる
   if (!dummyDB.containsKey(payload['email'])) {
     return Response.unauthorized(

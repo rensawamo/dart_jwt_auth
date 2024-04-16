@@ -98,12 +98,12 @@ class SignUpPage extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
             const Text(
-              'メールアドレスまたはパスワードが違います。',
+              'データが正常に登録できませんでした',
               style: TextStyle(
                 color: Colors.red,
               ),
             ),
-            _buildElevatedButton('ログイン', () async {
+            _buildElevatedButton('新規登録', () async {
               final email = emailController.text;
               final password = passwordController.text;
               final isLogin = await auth.register(email, password);
