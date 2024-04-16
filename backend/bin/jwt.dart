@@ -46,7 +46,13 @@ String generateJWT(
   return jwt;
 }
 
-Map<String, dynamic> getPayload(String key, String jwt) {
+Map<String, dynamic> getHeader(String jwt) {
+  final splits = jwt.split('.');
+  final payloadString = base64Decode(splits[0]);
+  return convert.json.decode(payloadString) as Map<String, dynamic>;
+}
+
+Map<String, dynamic> getPayload(String jwt) {
   final splits = jwt.split('.');
   final payloadString = base64Decode(splits[1]);
   return convert.json.decode(payloadString) as Map<String, dynamic>;
@@ -54,13 +60,19 @@ Map<String, dynamic> getPayload(String key, String jwt) {
 
 bool checkJWT(String key, String jwt) {
   final splits = jwt.split('.');
+
+  // ヘッダーチェック
+  if (splits.length != 3) return false;
+  final alg = getHeader(jwt)['alg'] as String;
+  if (alg != 'HS256') return false;
+
   final unsignedToken = '${splits[0]}.${splits[1]}'; // headers, payload
   final signature = splits[2];
 
   // 秘密鍵を用いて署名無しトークンが改竄されていないかチェック
   if (hmacSHA256(key, unsignedToken) != signature) return false;
 
-  final payload = getPayload(key, jwt);
+  final payload = getPayload(jwt);
 
   // 有効期限チェック
   final diff = DateTime.now()

@@ -12,7 +12,7 @@ void main() {
     expect(checkJWT(key, jwt), true);
 
     if (checkJWT(key, jwt)) {
-      final pl = getPayload(key, jwt);
+      final pl = getPayload(jwt);
       print(pl);
       expect(pl['sub'] == payload['sub'], true);
     }
@@ -21,6 +21,16 @@ void main() {
   test('invalid JWT', () {
     const header = {'alg': 'HS256', 'typ': 'JWT'};
     const payload = {'sub': 'testtest', 'iat': 1516239022, 'exp': 100};
+
+    const key = 'secret';
+    final jwt = generateJWT(header, payload, key);
+
+    expect(checkJWT(key, jwt), false);
+  });
+
+    test('invalid JWT 2', () {
+    const header = {'alg': 'none', 'typ': 'JWT'};
+    const payload = {'sub': 'testtest', 'iat': 1516239022, 'exp': 1813150800};
 
     const key = 'secret';
     final jwt = generateJWT(header, payload, key);
