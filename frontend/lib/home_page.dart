@@ -18,6 +18,12 @@ class HomePage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            ElevatedButton(
+              onPressed: () async => await auth.getUserData(),
+              child: const Text(
+                'サーバーからのJWTトークンが有効のときに User情報を取得 -> ターミナル',
+              ),
+            ),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10),
               width: 200,

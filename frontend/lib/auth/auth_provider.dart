@@ -27,16 +27,18 @@ class AuthNotifier extends Notifier<AsyncValue<User?>> {
   FutureOr<User> getUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final response = await http.post(
+    // HTTP GETリクエストの送信
+    final response = await http.get(
       Uri.parse('http://127.0.0.1:8080/user'),
       headers: {
-        'alg': 'HS256',
-        'typ': 'JWT',
+        'Authorization': 'Bearer $token',
+        'Typ': 'JWT',
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode({'token': token}),
     );
+
     final json = jsonDecode(response.body) as Map<String, dynamic>;
+    print(User.fromJson(json).email);
     return User.fromJson(json);
   }
 
