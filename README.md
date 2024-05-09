@@ -1,6 +1,7 @@
 
 ### [参照](https://qiita.com/Odatetsu/items/2326575f01a9a460ace4#%E3%83%98%E3%83%83%E3%83%80%E3%83%BC-header)
 
+### [認証パターン 論文](https://iopscience.iop.org/article/10.1088/1742-6596/910/1/012060/pdf)
 
 ## JWTと JWS 
 JWSとはJSON Web Signatureの略で、ヘッダーとペイロードと署名のJSON形式のデータをそれぞれBase64URLでエンコードして.で連結した文字列
